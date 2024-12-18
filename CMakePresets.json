@@ -1,0 +1,14 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": { "major": 3, "minor": 15 },
+    "configurePresets": [
+      {
+        "name": "default",
+        "generator": "Visual Studio 17 2022", 
+        "binaryDir": "${sourceDir}/build",
+        "cacheVariables": {
+          "CMAKE_TOOLCHAIN_FILE": "C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+        }
+      }
+    ]
+  }

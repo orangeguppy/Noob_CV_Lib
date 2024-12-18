@@ -1,0 +1,10 @@
+^C:\CVLIB_PROJ\BUILD\CMAKEFILES\508CA26CCF2C5533CF99CB253954A044\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/cvlib_proj -BC:/cvlib_proj/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/cvlib_proj/build/cv_library.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
