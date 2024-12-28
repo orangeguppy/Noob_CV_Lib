@@ -1,5 +1,0 @@
-C:/cvlib_proj/build/CMakeFiles/cv_library.dir
-C:/cvlib_proj/build/CMakeFiles/grayscale_conversion.dir
-C:/cvlib_proj/build/CMakeFiles/INSTALL.dir
-C:/cvlib_proj/build/CMakeFiles/ALL_BUILD.dir
-C:/cvlib_proj/build/CMakeFiles/ZERO_CHECK.dir

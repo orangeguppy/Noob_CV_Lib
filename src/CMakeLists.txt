@@ -5,6 +5,7 @@ add_library(opencv_cv_lib STATIC
     feature_detection.cpp
     transformation.cpp
     utils.cpp
+    MedianFilter.cpp
 )
 
 # Link OpenCV to the library

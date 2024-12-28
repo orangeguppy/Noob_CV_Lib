@@ -5,7 +5,5 @@
 /*
  * This function is a manual implementation of the Convolution operation
  */
-bool checkIfMatOrUMat(const cv::InputArray);
-bool checkIfMatOrUmat(const cv::OutputArray);
 void manualFilter2D(const cv::Mat &src, cv::Mat &dst, const cv::Mat &kernel, int stride, int depthChannelsCode, const std::string& paddingMode);
 #endif

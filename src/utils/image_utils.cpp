@@ -21,7 +21,7 @@ int calculateOutputSize(int inputSize, int filterSize, int pStart, int pEnd, int
 
 std::tuple<cv::Mat, int, int> applyPaddingAndCalculateOutputSize(const cv::Mat &src, const cv::Mat &kernel, int stride, const std::string& paddingMode) {
     int filterSize = kernel.rows;
-int inputSize = src.rows;
+    int inputSize = src.rows;
 
     cv::Mat paddedImage; // Stores the output
     int outputWidthSize, outputHeightSize;

@@ -17,4 +17,9 @@ int main() {
     cv::Mat inputImage2 = cv::imread("C:/cvlib_proj/examples/subhome-ai.jpg");
     cv::Mat outputImage2;
     applySobel(inputImage2, outputImage2);
+
+    cv::Mat inputImage3 = cv::imread("C:/cvlib_proj/examples/hais.png", cv::IMREAD_GRAYSCALE);
+    cv::Mat outputImage3;
+    applyMedianFilter(inputImage3, outputImage3, 3);
+    std::cout <<"Done!!\n";
 }
