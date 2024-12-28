@@ -1,7 +1,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include "utils/image_utils.h"
-#include "core/MedianFilter.h"
+#include "utils/core_utils.h"
 /*
  * @brief Converts an RGB image to greyscale
  * @param src InputArray containing the input RGB image
@@ -159,16 +159,20 @@ void applyGaussianBlur(const cv::Mat& src, cv::Mat& dst, float sigma) {
 }
 
 /*
-* Apply Gaussian blurring using two separable 1D Gaussian filters
-*/
-void applyMedianFilter(const cv::Mat& src, cv::Mat& dst, int kernelSize) {
+* Apply Median Filtering with a predefined kernel size for a single-channel image
+// */
+void applyMedianFilterSingleChannel(const cv::Mat& src, cv::Mat& dst, int kernelSize) {
     // Don't accept even-sized kernels
-    if (kernelSize % 2 == 0 || kernelSize < 1) {
+    if (kernelSize % 2 == 0 || kernelSize <= 1) {
         throw std::invalid_argument("Kernel size must be an odd number greater than 1.");
     }
-
     int halfKernel = kernelSize / 2;
+    // Window size for calculating median
+    int windowSize = kernelSize * kernelSize;
     cv::Mat paddedImg;
+
+    // Initialise the histogram
+    int histogram[256] = {0};
 
     if (src.channels() == 1) {
         std::cout <<"Happening\n";
@@ -179,69 +183,47 @@ void applyMedianFilter(const cv::Mat& src, cv::Mat& dst, int kernelSize) {
         // apply the filter to the single channel directly
         // Add a border so that the corners can be filtered as well
         cv::copyMakeBorder(src, paddedImg, halfKernel, halfKernel, halfKernel, halfKernel, cv::BORDER_REFLECT); // mirror along the edges
-        cv::imwrite("padded_image_real.jpg", paddedImg);
 
-        std::cout <<"Got here\n";
-        // Initialise the sliding window storing the first set of pixel values
-        MedianFilter mf;
-        for (int i = -halfKernel ; i <= halfKernel ; i++) {
-            for (int j = -halfKernel ; j <= halfKernel ; j++) {
-                mf.insertValue(paddedImg.at<uchar>(halfKernel + i, halfKernel + j));
+        // Initialise the histogram
+        for (int i = 0 ; i < kernelSize ; i++) {
+            for (int j = 0 ; j < kernelSize ; j++) {
+                int currentValue = paddedImg.at<uchar>(i, j);
+                histogram[currentValue]++;
             }
         }
-        
 
-        // Get the first median and store it in the output
-        dst.at<uchar>(0,0) = mf.getMedian();
-
-        std::cout <<"Got here2\n";
+        // Add the first median
+        dst.at<uchar>(0,0) = findMedian(histogram, windowSize, 256);
 
         // Iterate each pixel in the input image
         for (int i = halfKernel ; i < src.rows ; i++) {
             for (int j = halfKernel ; j < src.cols ; j++) {
-                std::cout<< i << "/" << src.rows <<"\n";
-                // Skip the first iteration of the loop as the kernel has already been initialised in the previous step
                 if (i == halfKernel && j == halfKernel) {
                     continue;
                 }
+                // std::cout <<i<<" "<<j<<"\n";
+                if (j == halfKernel) { // Case 1: Starting a new row
+                    std::fill(histogram, histogram + 256, 0);
 
-                // Push out old elements
-                // Case 1: We are starting a new row, so reinitialise the kernel
-                // Reset the sliding window for the new row
-                if (j == 0) {
-                    mf = MedianFilter();
+                    // Refill the kernel
                     for (int m = -halfKernel ; m <= halfKernel ; m++) {
                         for (int n = -halfKernel ; n <= halfKernel ; n++) {
-                            int row = i + m + halfKernel;
-                            int col = n + halfKernel;
-                            if (row >= 0 && row < paddedImg.rows && col >= 0 && col < paddedImg.cols) {
-                                mf.insertValue(paddedImg.at<uchar>(row, col));
-                            }
+                            int currentValue = paddedImg.at<uchar>(m+i, n+j);
+                            histogram[currentValue]++;
                         }
                     }
-                } else { // Case 2: Normal sliding
-                    for (int k = -halfKernel; k <= halfKernel; k++) {
-                        int rowIn = i + k + halfKernel;  // rowIn corresponds to the row entering the window
-                        int colIn = j + halfKernel;      // colIn corresponds to the column entering the window
-                        int colOut = j - halfKernel - 1; // colOut corresponds to the column leaving the window
-
-                        // Add the new column entering the window
-                        if (rowIn >= 0 && rowIn < paddedImg.rows && colIn >= 0 && colIn < paddedImg.cols) {
-                            uchar newPixel = paddedImg.at<uchar>(rowIn, colIn);
-                            mf.insertValue(newPixel);
-                            std::cout << "Inserting new pixel at (" << rowIn << ", " << colIn << "): " << static_cast<int>(newPixel) << std::endl;
-                        }
-
-                        // Remove the column sliding out of the window
-                        if (rowIn >= 0 && rowIn < paddedImg.rows && colOut >= 0 && colOut < paddedImg.cols) {
-                            uchar oldPixel = paddedImg.at<uchar>(rowIn, colOut);
-                            mf.removeVal(oldPixel);
-                            std::cout << "Removing old pixel at (" << rowIn << ", " << colOut << "): " << static_cast<int>(oldPixel) << std::endl;
-                        }
+                } else { // Case 2: Normal sliding across the row
+                    for (int k = -halfKernel ; k <= halfKernel ; k++) {
+                        int newValue = paddedImg.at<uchar>(i + k, j + halfKernel);
+                        histogram[newValue]++;
+                        // Remove corresponding old element
+                        int oldValue = paddedImg.at<uchar>(i + k, j - halfKernel - 1);
+                        histogram[oldValue]--;
                     }
                 }
-                // Store the median for the current pixel
-                dst.at<uchar>(i, j) = mf.getMedian();
+                int median = findMedian(histogram, windowSize, 256);
+                // std::cout << "Median at (" << i << ", " << j << ") is: " << median << std::endl;
+                dst.at<uchar>(i - halfKernel, j - halfKernel) = median;
             }
         }
         cv::imwrite("medianfilteringout.jpg", dst);
@@ -252,6 +234,29 @@ void applyMedianFilter(const cv::Mat& src, cv::Mat& dst, int kernelSize) {
         // Add a border so that the corners can be filtered as well
         cv::copyMakeBorder(src, paddedImg, halfKernel, halfKernel, halfKernel, halfKernel, cv::BORDER_REFLECT); // mirror along the edges
         return;
+    } else {
+        throw std::invalid_argument("Unsupported number of channels in input image.");
+    }
+}
+
+void applyMedianFilter(const cv::Mat& src, cv::Mat& dst, int kernelSize) {
+    if (src.channels() == 1) {
+        // Can directly apply the median filter to a greyscale image
+        applyMedianFilterSingleChannel(src, dst, kernelSize);
+    } else if (src.channels() == 3) {
+        // Split the 3 channels in RGB
+        std::vector<cv::Mat> channels(3);
+        std::vector<cv::Mat> filteredChannels(3);
+        cv::split(src, channels);
+
+        // Apply the median filter to each channel
+        for (int c = 0; c < 3; c++) {
+            applyMedianFilterSingleChannel(channels[c], filteredChannels[c], kernelSize);
+        }
+
+        // Merge the filtered channels back into one image
+        cv::merge(filteredChannels, dst);
+        cv::imwrite("rgb_median_filter.jpg", dst);
     } else {
         throw std::invalid_argument("Unsupported number of channels in input image.");
     }
