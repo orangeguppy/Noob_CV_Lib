@@ -22,4 +22,9 @@ int main() {
     cv::Mat outputImage3;
     applyMedianFilter(inputImage3, outputImage3, 3);
     std::cout <<"Done!!\n";
+
+    cv::Mat inputImage4 = cv::imread("C:/cvlib_proj/examples/doge.png", cv::IMREAD_GRAYSCALE);
+    cv::Mat outputImage4;
+    applyBilateralFilterSingleChannel(inputImage4, outputImage4, 5, 3.0, 25.0);
+    std::cout <<"Done!!\n";
 }
