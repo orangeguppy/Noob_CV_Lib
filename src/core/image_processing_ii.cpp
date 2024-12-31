@@ -2,49 +2,110 @@
 #include <opencv2/opencv.hpp>
 #include "utils/image_utils.h"
 #include "utils/core_utils.h"
+#include <omp.h>
 
 #define PI 3.141592653589793
 
+// Need to flip the quadrants for plotting thr frequencies after calculating them in applyFourierTransformSingleChannel
+void fftShift(cv::Mat& magnitudeImage) {
+    // Calculate the center of the image
+    int centreX = magnitudeImage.cols / 2;
+    int centreY = magnitudeImage.rows / 2;
+
+    // Split the image into four quadrants
+    cv::Mat quad0(magnitudeImage, cv::Rect(0, 0, centreX, centreY)); // Top-left, low frequencies
+    cv::Mat quad1(magnitudeImage, cv::Rect(centreX, 0, centreX, centreY)); // Top-right, high frequencies in vertical direction
+    cv::Mat quad2(magnitudeImage, cv::Rect(0, centreY, centreX, centreY)); // Bottom-left, high frequencies in horizontal directions
+    cv::Mat quad3(magnitudeImage, cv::Rect(centreX, centreY, centreX, centreY)); // Bottom-right, high frequencies in both directions
+
+    // Create temporary storage for swapping quadrants
+    cv::Mat tmp;
+
+    // Swap quadrants diagonally so that the lower frequencies are at the centre
+    quad0.copyTo(tmp);
+    quad3.copyTo(quad0);
+    tmp.copyTo(quad3);
+
+    quad1.copyTo(tmp);
+    quad2.copyTo(quad1);
+    tmp.copyTo(quad2);
+}
+
+// Plot the frequencies after calculating the Fourier Transform
+void plotMagnitudeSpectrum(const cv::Mat& complexImage) {
+    // Obtain the real and imaginary parts from the input
+    std::vector<cv::Mat> channels(2);
+    cv::split(complexImage, channels);
+
+    // Calculate the magnitude using both parts
+    cv::Mat magnitudeImage;
+    cv::magnitude(channels[0], channels[1], magnitudeImage);
+
+    // Use logarithmic scaling for better visibility
+    magnitudeImage += cv::Scalar::all(1); // Avoid log(0)
+    cv::log(magnitudeImage, magnitudeImage);
+
+    // Shift the quadrants to ensure lower frequencies are in the middle
+    fftShift(magnitudeImage);
+
+    // Normalise to [0,255]
+    cv::normalize(magnitudeImage, magnitudeImage, 0, 255, cv::NORM_MINMAX);
+    magnitudeImage.convertTo(magnitudeImage, CV_8U);
+
+    cv::applyColorMap(magnitudeImage, magnitudeImage, cv::COLORMAP_JET);
+
+    // Save the result as an image
+    cv::imwrite("magnitude_spectrum.jpg", magnitudeImage);
+
+    // Display the image
+    cv::imshow("Magnitude Spectrum", magnitudeImage);
+    cv::waitKey(0);
+}
+
 /*
- * @brief Converts an RGB image to greyscale
- * @param src InputArray containing the input RGB image
- * @param dst OutputArray containing the output greyscale image
- * @note If the input image is from the GPU, it will be moved to CPU
+ * @brief Performs Discrete Fourier Transform on an input image
+ * @param src cv::Mat, the input image
+ * @param dst cv::Mat, the output image
 */
-void applyFourierTransformSingleChannel(const cv::InputArray &src, cv::OutputArray &dst) {
+void applyFourierTransformSingleChannel(cv::Mat& src, cv::Mat& dst) {
     // Raise an error if the input is empty
     if (src.empty()) {
         throw std::invalid_argument("Error: Empty image matrix!");
     }
 
-    // Check if the InputArray contains a cv::Mat or cv::UMat
-    // If it is neither, raise an error
-    cv::Mat inputImage; // This variable stores the cv::Mat stored in src for a valid input
-
-    if (src.isUMat()) {
-        inputImage = src.getUMat(cv::ACCESS_READ).getMat(cv::ACCESS_READ);
-    } else if (src.isMat()) {
-        inputImage = src.getMat();
-    } else {
-        throw std::invalid_argument("Error: Input is not cv::Mat or cv::UMat!");
-    }
+    // Convert to CV_32F for more precision
+    src.convertTo(src, CV_32F); // Need this higher level of precision for complex numbers
 
     // Create an empty array to store the result
-    dst.create(inputImage.rows, inputImage.cols, CV_8UC1);
+    dst.create(src.rows, src.cols, CV_32FC2);
 
-    // Reference Counting: OpenCV uses smart pointers with reference counting, 
-    // so outputImage and dst.getMat() point to the same memory unless a deep copy
-    // is triggered.
-    cv::Mat outputImage = dst.getMat();
+    // Iterate all possible horizontal and vertical frequencies in the image
+    // The first two for loops here are for iterating frequency components
+    #pragma omp parallel for
+    for (int p = 0 ; p < src.rows ; p++) {
+        for (int q = 0 ; q < src.cols ; q++) {
+            // Stores the value of the frequency component
+            std::complex<float> freqComponent(0.0f, 0.0f);
 
-    float exponentPowerConstant = -1.0 * std::sqrt(-1) * 2 * PI;
+            // These two for loops are for iterating all pixels to calculate the intensity of this frequency component
+            // For all pixels
+            for (int m = 0 ; m < src.rows ; m++) {
+                for (int n = 0 ; n < src.cols ; n++) {
+                    // Get the current value at this frequency
+                    float currentValue = src.at<float>(m, n);
+                    float angle = -2.0f * PI * (static_cast<float>(p * m) / src.rows + static_cast<float>(q * n) / src.cols);
 
-    // Loop through all pixels in the image
-    for (int i = 0 ; i < src.rows ; i++) {
-        for (int j = 0 ; j < src.cols ; j++) {
-            int currentValue = src.at<uchar>(i, j);
-            float exponentTerm = std::exp(exponentPowerConstant * ())
+                    // 1.0f because unit circle
+                    std::complex<float> expTerm = std::polar(1.0f, angle);
+
+                    // Accumulate values for this frequency component
+                    freqComponent += std::complex<float>(currentValue) * expTerm;
+                }
+            }
+
+            // Save value for this frequency component
+            dst.at<cv::Vec2f>(p, q)[0] = freqComponent.real(); // Real part
+            dst.at<cv::Vec2f>(p, q)[1] = freqComponent.imag(); // Imaginary part
         }
     }
-    cv::imwrite("greyscaleout.jpg", outputImage);
 }

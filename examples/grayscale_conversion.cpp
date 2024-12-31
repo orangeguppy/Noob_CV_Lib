@@ -1,5 +1,6 @@
 #include <iostream>
 #include "core/image_processing.h"
+#include "core/image_processing_ii.h"
 #include <opencv2/opencv.hpp>
 
 int main() {
@@ -26,5 +27,11 @@ int main() {
     cv::Mat inputImage4 = cv::imread("C:/cvlib_proj/examples/doge.png", cv::IMREAD_GRAYSCALE);
     cv::Mat outputImage4;
     applyBilateralFilterSingleChannel(inputImage4, outputImage4, 5, 3.0, 25.0);
+    std::cout <<"Done!!\n";
+
+    cv::Mat inputImage5 = cv::imread("C:/cvlib_proj/examples/rubiks.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat outputImage5;
+    applyFourierTransformSingleChannel(inputImage5, outputImage5);
+    plotMagnitudeSpectrum(outputImage5);
     std::cout <<"Done!!\n";
 }

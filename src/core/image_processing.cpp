@@ -336,7 +336,7 @@ void applyBilateralFiltering(const cv::Mat& src, cv::Mat& dst, int kernelSize, f
 
         // Apply the median filter to each channel
         for (int c = 0; c < 3; c++) {
-            applyBilateralFilterSingleChannel(channels[c], filteredChannels[c], kernelSize);
+            applyBilateralFilterSingleChannel(channels[c], filteredChannels[c], kernelSize, spatialSigma, brightnessSigma);
         }
 
         // Merge the filtered channels back into one image
