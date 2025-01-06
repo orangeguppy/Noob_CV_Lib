@@ -5,7 +5,7 @@
 
 int main() {
     // Call a function from your library
-    cv::Mat inputImage = cv::imread("C:/cvlib_proj/examples/subhome-ai.jpg");
+    cv::Mat inputImage = cv::imread("examples/subhome-ai.jpg");
     cv::Mat outputImage;
     convertToGreyscale(inputImage, outputImage);
     // Save the result
@@ -15,21 +15,21 @@ int main() {
         std::cerr << "Error: Failed to save greyscale image!" << std::endl;
     }
 
-    cv::Mat inputImage2 = cv::imread("C:/cvlib_proj/examples/subhome-ai.jpg");
+    cv::Mat inputImage2 = cv::imread("examples/subhome-ai.jpg");
     cv::Mat outputImage2;
     applySobel(inputImage2, outputImage2);
 
-    cv::Mat inputImage3 = cv::imread("C:/cvlib_proj/examples/dood.png");
+    cv::Mat inputImage3 = cv::imread("examples/dood.png");
     cv::Mat outputImage3;
     applyMedianFilter(inputImage3, outputImage3, 3);
     std::cout <<"Done!!\n";
 
-    cv::Mat inputImage4 = cv::imread("C:/cvlib_proj/examples/doge.png", cv::IMREAD_GRAYSCALE);
+    cv::Mat inputImage4 = cv::imread("examples/doge.png", cv::IMREAD_GRAYSCALE);
     cv::Mat outputImage4;
     applyBilateralFilterSingleChannel(inputImage4, outputImage4, 5, 3.0, 25.0);
     std::cout <<"Done!!\n";
 
-    cv::Mat inputImage5 = cv::imread("C:/cvlib_proj/examples/rubiks.png", cv::IMREAD_GRAYSCALE);
+    cv::Mat inputImage5 = cv::imread("examples/rubiks.jpg", cv::IMREAD_GRAYSCALE);
     cv::Mat outputImage5;
     cv::Mat finalOutput;
     applyFourierTransformSingleChannel(inputImage5, outputImage5);

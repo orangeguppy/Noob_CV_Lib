@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------------
 # Specify the minimum CMake version required, set project name and library
 # ---------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.25)
 project(cv_library)
 add_library(${PROJECT_NAME})
 message("Project name is: ${PROJECT_NAME}")
@@ -13,7 +13,7 @@ find_package(OpenMP REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
 
 # ---------------------------------------------------------------------------------
-# Find packages installed with vcpkg
+# Find packages installed
 # ---------------------------------------------------------------------------------
 # Find Protobuf
 include(FindProtobuf)
