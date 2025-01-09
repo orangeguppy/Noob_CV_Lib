@@ -64,31 +64,3 @@ foreach(example_file ${EXAMPLE_FILES})
     target_link_libraries(${example_name} PRIVATE ${PROJECT_NAME}) # Link the library
     set_target_properties(${example_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin) # Place executables in bin/
 endforeach()
-# file(GLOB_RECURSE EXAMPLE_SOURCES "${CMAKE_SOURCE_DIR}/examples/*.cpp")
-# foreach(example_file ${EXAMPLE_SOURCES})
-#     # Extract relative path from the examples directory
-#     file(RELATIVE_PATH relative_example_file "${CMAKE_SOURCE_DIR}/examples" "${example_file}")
-    
-#     # Extract the executable name without extension
-#     get_filename_component(example_name "${relative_example_file}" NAME_WE)
-    
-#     # Extract the directory path within examples
-#     get_filename_component(example_directory "${relative_example_file}" DIRECTORY)
-
-#     # Define the full output directory path
-#     set(output_directory "${CMAKE_BINARY_DIR}/examples/${example_directory}")
-
-#     # Create the executable
-#     add_executable(${example_name} ${example_file})
-
-#     # Link the necessary libraries
-#     target_link_libraries(${example_name} PRIVATE ${PROJECT_NAME} ${OpenCV_LIBS})
-
-#     # Set the runtime output directory to maintain the folder structure
-#     set_target_properties(${example_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${output_directory}")
-
-#     message("Output dir is: ${output_directory}")
-#     message("Executable at:" ${example_name} ${example_file})
-#     message("Relative example path: ${relative_example_file}")
-#     message("SRC and BUILD:" ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
-# endforeach()
