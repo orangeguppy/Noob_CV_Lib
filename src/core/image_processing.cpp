@@ -48,7 +48,7 @@ void convertToGreyscale(const cv::InputArray &src, cv::OutputArray &dst) {
         const cv::Vec3b pixel = inputData[index];
         outputData[index] = static_cast<uchar>(0.299 * pixel[2] + 0.587 * pixel[1] + 0.114 * pixel[0]);
     }
-    cv::imwrite("greyscaleout.jpg", outputImage);
+    cv::imwrite("output/greyscaleout.jpg", outputImage);
 }
 
 void applySobel(const cv::InputArray &src, cv::OutputArray &dst) {
@@ -98,7 +98,7 @@ void applySobel(const cv::InputArray &src, cv::OutputArray &dst) {
     cv::magnitude(gradX, gradY, gradMag);
     gradMag.convertTo(dst, CV_8U);
 
-    cv::imwrite("sobelout.jpg", dst.getMat());
+    cv::imwrite("output/sobelout.jpg", dst.getMat());
 }
 
 /*
@@ -155,7 +155,7 @@ void applyGaussianBlur(const cv::Mat& src, cv::Mat& dst, float sigma) {
         // After applying the filter to each channel separately, we can combine the 3 channels back and
         // return the final output RGB image
         cv::merge(channels, dst);
-        cv::imwrite("gaussianout.jpg", dst);
+        cv::imwrite("output/gaussianout.jpg", dst);
     } else {
         throw std::invalid_argument("Unsupported number of channels in input image.");
     }
@@ -229,7 +229,7 @@ void applyMedianFilterSingleChannel(const cv::Mat& src, cv::Mat& dst, int kernel
                 dst.at<uchar>(i - halfKernel, j - halfKernel) = median;
             }
         }
-        cv::imwrite("medianfilteringout.jpg", dst);
+        cv::imwrite("output/medianfilteringout.jpg", dst);
     } else {
         throw std::invalid_argument("Unsupported number of channels in input image.");
     }
@@ -255,7 +255,7 @@ void applyMedianFilter(const cv::Mat& src, cv::Mat& dst, int kernelSize) {
 
         // Merge the filtered channels back into one image
         cv::merge(filteredChannels, dst);
-        cv::imwrite("rgb_median_filter.jpg", dst);
+        cv::imwrite("output/rgb_median_filter.jpg", dst);
     } else {
         throw std::invalid_argument("Unsupported number of channels in input image.");
     }
@@ -318,7 +318,7 @@ void applyBilateralFilterSingleChannel(const cv::Mat& src, cv::Mat& dst, int ker
                 dst.at<uchar>(i - halfKernel, j - halfKernel) = outputValue;
             }
         }
-        cv::imwrite("bilateralfilteringout.jpg", dst);
+        cv::imwrite("output/bilateralfilteringout.jpg", dst);
     } else {
         throw std::invalid_argument("Unsupported number of channels in input image.");
     }
@@ -341,7 +341,7 @@ void applyBilateralFiltering(const cv::Mat& src, cv::Mat& dst, int kernelSize, f
 
         // Merge the filtered channels back into one image
         cv::merge(filteredChannels, dst);
-        cv::imwrite("rgb_median_filter.jpg", dst);
+        cv::imwrite("output/rgb_median_filter.jpg", dst);
     } else {
         throw std::invalid_argument("Unsupported number of channels in input image.");
     }
