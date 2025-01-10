@@ -1,7 +1,3 @@
 build/
 .vscode/
-CMakeFiles/
-Makefile
-CMakeCache.txt
-cmake_install.cmake
-libcv_library.a
+output/
