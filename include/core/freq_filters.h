@@ -1,5 +1,5 @@
-#ifndef IMAGE_PROCESSING_II_H
-#define IMAGE_PROCESSING_II_H
+#ifndef FREQ_FILTERS_H
+#define FREQ_FILTERS_H
 #include <opencv2/opencv.hpp>
 
 /*

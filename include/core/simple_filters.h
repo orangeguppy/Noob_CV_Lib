@@ -1,5 +1,5 @@
-#ifndef IMAGE_PROCESSING_H
-#define IMAGE_PROCESSING_H
+#ifndef SIMPLE_FILTERS_H
+#define SIMPLE_FILTERS_H
 #include <opencv2/opencv.hpp>
 
 /*

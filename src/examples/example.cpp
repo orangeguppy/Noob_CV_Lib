@@ -1,7 +1,6 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include "core/image_processing.h"
-#include "core/image_processing_ii.h"
+#include "core/simple_filters.h"
 
 int main() {
     // Call a function from your library
