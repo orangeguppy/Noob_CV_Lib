@@ -1,31 +1,25 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include "core/simple_filters.h"
+#include "core/preprocessing.h"
 
 int main() {
-    // Call a function from your library
-    cv::Mat inputImage = cv::imread("images/subhome-ai.jpg");
-    cv::Mat outputImage;
-    convertToGreyscale(inputImage, outputImage);
-    // Save the result
-    if (cv::imwrite("output/greyscale.jpg", outputImage)) {
-        std::cout << "Greyscale image saved!" << std::endl;
-    } else {
-        std::cerr << "Error: Failed to save greyscale image!" << std::endl;
-    }
+    cv::Mat greyscaleImage;
+    convertToGreyscale(readImage("images/subhome-ai.jpg", cv::IMREAD_COLOR), greyscaleImage);
+    writeImage("output/greyscale.jpg", greyscaleImage);
 
-    cv::Mat inputImage2 = cv::imread("images/subhome-ai.jpg");
-    cv::Mat outputImage2;
-    applySobel(inputImage2, outputImage2);
+    cv::Mat sobelImage;
+    applySobel(greyscaleImage, sobelImage);
+    writeImage("output/sobel.jpg", sobelImage);
 
-    cv::Mat inputImage3 = cv::imread("images/dood.png");
-    cv::Mat outputImage3;
-    applyMedianFilter(inputImage3, outputImage3, 3);
-    std::cout <<"Done!!\n";
+    cv::Mat medFiltImage;
+    applyMedianFilter(readImage("images/dood.png", cv::IMREAD_COLOR), medFiltImage, 3);
+    writeImage("output/medianfilteringout.jpg", medFiltImage);
 
-    cv::Mat inputImage4 = cv::imread("images/doge.png", cv::IMREAD_GRAYSCALE);
-    cv::Mat outputImage4;
-    applyBilateralFilterSingleChannel(inputImage4, outputImage4, 5, 3.0, 25.0);
+    cv::Mat bilatFiltImage;
+    applyBilateralFilterSingleChannel(readImage("images/doge.png", cv::IMREAD_GRAYSCALE), bilatFiltImage, 5, 3.0, 25.0);
+    writeImage("output/bilatfilteroutput.jpg", bilatFiltImage);
+
     std::cout <<"Done!!\n";
 
     // cv::Mat inputImage5 = cv::imread("images/rubiks.jpg", cv::IMREAD_GRAYSCALE);

@@ -3,6 +3,39 @@
 #include "utils/image_utils.h"
 #include "utils/core_utils.h"
 #include "core/constants.h"
+#include "core/preprocessing.h"
+
+void applySobel(const cv::Mat &src, cv::OutputArray &dst) {
+    // Raise an error if the input is empty
+    if (src.empty()) {
+        throw std::invalid_argument("Error: Empty image matrix!");
+    }
+
+    // Create an empty array to store the result
+    dst.create(src.rows, src.cols, CV_8UC1);
+
+    // Reference Counting: OpenCV uses smart pointers with reference counting, 
+    // so outputImage and dst.getMat() point to the same memory unless a deep copy
+    // is triggered.
+    // cv::Mat outputImage = dst.getMat();
+
+    // Initialise the Gx and Gy finite difference operators
+    cv::Mat gradX, gradY;
+    cv::Mat Gx = (cv::Mat_<int>(3, 3) << -1, 0, 1, -2, 0, 2, -1, 0, 1);
+    cv::Mat Gy = (cv::Mat_<int>(3, 3) << -1, -2, -1, 0, 0, 0, 1, 2, 1);
+    
+    Gx.convertTo(Gx, CV_32F);
+    Gy.convertTo(Gy, CV_32F);
+
+    // Convolve the original image with each Sobel filterZ    
+    manualFilter2D(src, gradX, Gx, 1, CV_32F, "SAME");
+    manualFilter2D(src, gradY, Gy, 1, CV_32F, "SAME");
+    // std::cout << gradX;
+
+    cv::Mat gradMag;
+    cv::magnitude(gradX, gradY, gradMag);
+    gradMag.convertTo(dst, CV_8U);
+}
 
 /*
 * We use kernelSize = 3 * sigma + 1 because about 99.7% of data from a Gaussian distribution fall within 3 standard deviations, 
@@ -132,7 +165,7 @@ void applyMedianFilterSingleChannel(const cv::Mat& src, cv::Mat& dst, int kernel
                 dst.at<uchar>(i - halfKernel, j - halfKernel) = median;
             }
         }
-        cv::imwrite("output/medianfilteringout.jpg", dst);
+
     } else {
         throw std::invalid_argument("Unsupported number of channels in input image.");
     }
@@ -158,7 +191,6 @@ void applyMedianFilter(const cv::Mat& src, cv::Mat& dst, int kernelSize) {
 
         // Merge the filtered channels back into one image
         cv::merge(filteredChannels, dst);
-        cv::imwrite("output/rgb_median_filter.jpg", dst);
     } else {
         throw std::invalid_argument("Unsupported number of channels in input image.");
     }
@@ -221,7 +253,6 @@ void applyBilateralFilterSingleChannel(const cv::Mat& src, cv::Mat& dst, int ker
                 dst.at<uchar>(i - halfKernel, j - halfKernel) = outputValue;
             }
         }
-        cv::imwrite("output/bilateralfilteringout.jpg", dst);
     } else {
         throw std::invalid_argument("Unsupported number of channels in input image.");
     }
@@ -244,7 +275,6 @@ void applyBilateralFiltering(const cv::Mat& src, cv::Mat& dst, int kernelSize, f
 
         // Merge the filtered channels back into one image
         cv::merge(filteredChannels, dst);
-        cv::imwrite("output/rgb_median_filter.jpg", dst);
     } else {
         throw std::invalid_argument("Unsupported number of channels in input image.");
     }

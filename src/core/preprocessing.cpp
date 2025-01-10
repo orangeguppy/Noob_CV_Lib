@@ -47,55 +47,30 @@ void convertToGreyscale(const cv::InputArray &src, cv::OutputArray &dst) {
         const cv::Vec3b pixel = inputData[index];
         outputData[index] = static_cast<uchar>(0.299 * pixel[2] + 0.587 * pixel[1] + 0.114 * pixel[0]);
     }
-    cv::imwrite("output/greyscaleout.jpg", outputImage);
 }
 
-void applySobel(const cv::InputArray &src, cv::OutputArray &dst) {
-    // Raise an error if the input is empty
-    if (src.empty()) {
-        throw std::invalid_argument("Error: Empty image matrix!");
+/*
+ * @brief Read an image from a file
+ * @param filepath File path to read the image from
+ * @param color Whether to read the image in greyscale or color
+*/
+cv::Mat readImage(const std::string filepath, int color = cv::IMREAD_COLOR) {
+    cv::Mat image = cv::imread(filepath, color);
+
+    if(image.empty()) {
+        throw std::runtime_error("Could not read image: " + filepath);
     }
 
-    // Check if the InputArray is from the GPU or CPU
-    // If it is neither, raise an error
-    // This variable stores the image cv::Mat
-    cv::Mat inputImage;
-    if (src.isUMat()) {
-        inputImage = src.getUMat(cv::ACCESS_READ).getMat(cv::ACCESS_READ);
-    } else if (src.isMat()) {
-        inputImage = src.getMat();
-    } else {
-        throw std::invalid_argument("Error: Input is not cv::Mat or cv::UMat!");
+    return image;
+}
+
+/*
+ * @brief Write an image to a file
+ * @param filepath File path to write the image to
+ * @param image Image to write to a
+*/
+void writeImage(const std::string filepath, cv::Mat& image) {
+    if (!cv::imwrite(filepath, image)) {
+        throw std::runtime_error("Could not write image: " + filepath);
     }
-
-    // Convert the RGB to greyscale
-    cv::Mat greyImg;
-    convertToGreyscale(src, greyImg);
-
-    // Create an empty array to store the result
-    dst.create(greyImg.rows, greyImg.cols, CV_8UC1);
-
-    // Reference Counting: OpenCV uses smart pointers with reference counting, 
-    // so outputImage and dst.getMat() point to the same memory unless a deep copy
-    // is triggered.
-    cv::Mat outputImage = dst.getMat();
-
-    // Initialise the Gx and Gy finite difference operators
-    cv::Mat gradX, gradY;
-    cv::Mat Gx = (cv::Mat_<int>(3, 3) << -1, 0, 1, -2, 0, 2, -1, 0, 1);
-    cv::Mat Gy = (cv::Mat_<int>(3, 3) << -1, -2, -1, 0, 0, 0, 1, 2, 1);
-    
-    Gx.convertTo(Gx, CV_32F);
-    Gy.convertTo(Gy, CV_32F);
-
-    // Convolve the original image with each Sobel filterZ    
-    manualFilter2D(greyImg, gradX, Gx, 1, CV_32F, "SAME");
-    manualFilter2D(greyImg, gradY, Gy, 1, CV_32F, "SAME");
-    // std::cout << gradX;
-
-    cv::Mat gradMag;
-    cv::magnitude(gradX, gradY, gradMag);
-    gradMag.convertTo(dst, CV_8U);
-
-    cv::imwrite("output/sobelout.jpg", dst.getMat());
 }
