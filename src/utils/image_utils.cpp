@@ -66,7 +66,7 @@ std::tuple<cv::Mat, int, int> applyPaddingAndCalculateOutputSize(const cv::Mat &
     if (paddedImage.empty()) {
         throw std::runtime_error("Padded image is empty after padding!");
     }
-    cv::imwrite("padded_image.jpg", paddedImage);
+    // cv::imwrite("output/padded_image.jpg", paddedImage);
     return std::make_tuple(paddedImage, outputWidthSize, outputHeightSize);
 }
 
