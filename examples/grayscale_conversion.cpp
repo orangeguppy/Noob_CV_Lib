@@ -29,7 +29,7 @@ int main() {
     applyBilateralFilterSingleChannel(inputImage4, outputImage4, 5, 3.0, 25.0);
     std::cout <<"Done!!\n";
 
-    cv::Mat inputImage5 = cv::imread("C:/cvlib_proj/examples/rubiks.png", cv::IMREAD_GRAYSCALE);
+    cv::Mat inputImage5 = cv::imread("C:/cvlib_proj/examples/rubiks.jpg", cv::IMREAD_GRAYSCALE);
     cv::Mat outputImage5;
     cv::Mat finalOutput;
     applyFourierTransformSingleChannel(inputImage5, outputImage5);
