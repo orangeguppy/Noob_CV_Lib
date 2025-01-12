@@ -9,7 +9,9 @@ int main() {
     writeImage("output/greyscale.jpg", greyscaleImage);
 
     cv::Mat sobelImage;
-    applySobel(greyscaleImage, sobelImage);
+    cv::Mat gradX, gradY;
+    applySobel(greyscaleImage, gradX, gradY, sobelImage);
+    calculateSobelGradientMagnitudes(gradX, gradY, sobelImage);
     writeImage("output/sobel.jpg", sobelImage);
 
     cv::Mat medFiltImage;
@@ -20,7 +22,7 @@ int main() {
     applyBilateralFilterSingleChannel(readImage("images/doge.png", cv::IMREAD_GRAYSCALE), bilatFiltImage, 5, 3.0, 25.0);
     writeImage("output/bilatfilteroutput.jpg", bilatFiltImage);
 
-    std::cout <<"Done!!\n";
+    std::cout <<"Done:3!!\n";
 
     // cv::Mat inputImage5 = cv::imread("images/rubiks.jpg", cv::IMREAD_GRAYSCALE);
     // cv::Mat outputImage5;

@@ -5,7 +5,8 @@
 /*
  * This function applies the Sobel filter to an RGB image
  */
-void applySobel(const cv::Mat& src, cv::OutputArray &dst);
+void applySobel(const cv::Mat &src, cv::Mat &gradX, cv::Mat &gradY, cv::OutputArray &dst);
+void calculateSobelGradientMagnitudes(cv::Mat gradX, cv::Mat gradY, cv::OutputArray &dst);
 /*
  * This function applies Gaussian blurring using two separable 1D Gaussian kernels
  */

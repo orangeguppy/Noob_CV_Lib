@@ -5,7 +5,7 @@
 #include "core/constants.h"
 #include "core/preprocessing.h"
 
-void applySobel(const cv::Mat &src, cv::OutputArray &dst) {
+void applySobel(const cv::Mat &src, cv::Mat &gradX, cv::Mat &gradY, cv::OutputArray &dst) {
     // Raise an error if the input is empty
     if (src.empty()) {
         throw std::invalid_argument("Error: Empty image matrix!");
@@ -20,7 +20,6 @@ void applySobel(const cv::Mat &src, cv::OutputArray &dst) {
     // cv::Mat outputImage = dst.getMat();
 
     // Initialise the Gx and Gy finite difference operators
-    cv::Mat gradX, gradY;
     cv::Mat Gx = (cv::Mat_<int>(3, 3) << -1, 0, 1, -2, 0, 2, -1, 0, 1);
     cv::Mat Gy = (cv::Mat_<int>(3, 3) << -1, -2, -1, 0, 0, 0, 1, 2, 1);
     
@@ -30,8 +29,9 @@ void applySobel(const cv::Mat &src, cv::OutputArray &dst) {
     // Convolve the original image with each Sobel filterZ    
     manualFilter2D(src, gradX, Gx, 1, CV_32F, "SAME");
     manualFilter2D(src, gradY, Gy, 1, CV_32F, "SAME");
-    // std::cout << gradX;
+}
 
+void calculateSobelGradientMagnitudes(cv::Mat gradX, cv::Mat gradY, cv::OutputArray &dst) {
     cv::Mat gradMag;
     cv::magnitude(gradX, gradY, gradMag);
     gradMag.convertTo(dst, CV_8U);
