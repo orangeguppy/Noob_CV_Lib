@@ -35,11 +35,12 @@ std::tuple<cv::Mat, int, int> applyPaddingAndCalculateOutputSize(const cv::Mat &
         if (pStart < 0 || pEnd < 0) {
             throw std::runtime_error("Negative padding detected!");
         }
+        std::cout <<pStart<<" and "<<pEnd<<"\n";
         cv::copyMakeBorder(
             src, paddedImage, 
             pStart, pEnd,   // Top and Bottom padding
             pStart, pEnd,   // Left and Right padding
-            cv::BORDER_CONSTANT, cv::Scalar(0)  // Zero padding, BORDER_CONSTANT means all the padded areas are filled with the same padding
+            cv::BORDER_REFLECT_101  // Zero padding, BORDER_CONSTANT means all the padded areas are filled with the same padding
                                                 // and cv::Scalar(0) means this padding value is 0
         );
         outputWidthSize = calculateOutputSize(static_cast<int>(src.cols), static_cast<int>(filterSize), pStart, pEnd, stride);
@@ -87,6 +88,7 @@ void manualFilter2D(const cv::Mat &src, cv::Mat &dst, const cv::Mat &kernel, int
     // Pad the image
     std::tuple<cv::Mat, int, int> paddingAndOutputSize = applyPaddingAndCalculateOutputSize(src, kernel, stride, paddingMode);
     cv::Mat paddedImage;
+    paddedImage.create(src.rows, src.cols, depthChannelsCode);
     std::get<0>(paddingAndOutputSize).convertTo(paddedImage, CV_32F);
     if (paddedImage.type() != CV_32F) {
         throw std::runtime_error("Padded image type is not CV_32F.");
@@ -103,13 +105,11 @@ void manualFilter2D(const cv::Mat &src, cv::Mat &dst, const cv::Mat &kernel, int
     int kCols = kernel.cols;
     int kCentreY = kRows / 2;
     int kCentreX = kCols / 2;
-
-    std::cout <<"We got here!\n";
     
     // Perform the convolution
     #pragma omp parallel for collapse(2)
-    for (int y = kCentreY; y < paddedImage.rows - kCentreY - 1 ; y += stride) {
-        for (int x = kCentreX; x < paddedImage.cols - kCentreX - 1 ; x += stride) {
+    for (int y = kCentreY; y < paddedImage.rows - kCentreY ; y += stride) {
+        for (int x = kCentreX; x < paddedImage.cols - kCentreX ; x += stride) {
             double sum = 0.0;  // Use double for precision
 
             // Apply the kernel

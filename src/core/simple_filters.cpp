@@ -26,13 +26,15 @@ void applySobel(const cv::Mat &src, cv::Mat &gradX, cv::Mat &gradY, cv::OutputAr
     Gx.convertTo(Gx, CV_32F);
     Gy.convertTo(Gy, CV_32F);
 
-    // Convolve the original image with each Sobel filterZ    
+
+    // Convolve the original image with each Sobel filter
     manualFilter2D(src, gradX, Gx, 1, CV_32F, "SAME");
     manualFilter2D(src, gradY, Gy, 1, CV_32F, "SAME");
 }
 
 void calculateSobelGradientMagnitudes(cv::Mat gradX, cv::Mat gradY, cv::OutputArray &dst) {
     cv::Mat gradMag;
+    gradMag.create(gradX.rows, gradY.cols, CV_8U);
     cv::magnitude(gradX, gradY, gradMag);
     gradMag.convertTo(dst, CV_8U);
 }

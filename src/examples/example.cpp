@@ -2,6 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include "core/simple_filters.h"
 #include "core/preprocessing.h"
+#include "core/lucas_kanade.h"
 
 int main() {
     cv::Mat greyscaleImage;
@@ -21,6 +22,11 @@ int main() {
     cv::Mat bilatFiltImage;
     applyBilateralFilterSingleChannel(readImage("images/doge.png", cv::IMREAD_GRAYSCALE), bilatFiltImage, 5, 3.0, 25.0);
     writeImage("output/bilatfilteroutput.jpg", bilatFiltImage);
+
+    cv::Mat lucasKanadeImage;
+    applyLucasKanadeSingleChannel(readImage("images/shroom1.png", cv::IMREAD_GRAYSCALE), readImage("images/shroom2.png", cv::IMREAD_GRAYSCALE), lucasKanadeImage, 3);
+    visualiseOpticalFlow(lucasKanadeImage);
+    // writeImage("output/lucaskanadeout.jpg", lucasKanadeImage);
 
     std::cout <<"Done:3!!\n";
 
